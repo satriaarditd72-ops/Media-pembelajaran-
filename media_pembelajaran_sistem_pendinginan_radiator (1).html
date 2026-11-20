@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pendinginan Radiator (Liquid Cooled) - Media Pembelajaran TSM SMK</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        automotive: {
+                            dark: '#0f172a',
+                            slate: '#1e293b',
+                            blue: '#0284c7',
+                            cyan: '#06b6d4',
+                            heat: '#ef4444',
+                            warm: '#f97316'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Animations for Coolant Flow & Fan Rotation */
+        @keyframes flowDash {
+            to {
+                stroke-dashoffset: -32;
+            }
+        }
+        @keyframes flowDashReverse {
+            to {
+                stroke-dashoffset: 32;
+            }
+        }
+        @keyframes spinFan {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes pulseHotspot {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: scale(1.25);
+                opacity: 0.4;
+            }
+        }
+
+        .flow-active {
+            stroke-dasharray: 10 6;
+            animation: flowDash 0.8s linear infinite;
+        }
+        .flow-fast {
+            stroke-dasharray: 10 6;
+            animation: flowDash 0.4s linear infinite;
+        }
+        .flow-stopped {
+            stroke-dasharray: 4 4;
+            opacity: 0.25;
+        }
+        .fan-spinning {
+            transform-origin: center;
+            transform-box: fill-box;
+            animation: spinFan 0.35s linear infinite;
+        }
+        .hotspot-ring {
+            transform-origin: center;
+            transform-box: fill-box;
+            animation: pulseHotspot 2s infinite;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid #0284c7;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- 1. HEADER & NAVIGASI -->
+    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Brand / Title -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-br from-sky-500 to-blue-700 p-2.5 rounded-xl shadow-md shadow-sky-500/20">
+                        <i data-lucide="thermometer-sun" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">Modul Interaktif SMK</span>
+                            <span class="hidden sm:inline-block text-xs text-slate-400">Teknik Sepeda Motor (TSM)</span>
+                        </div>
+                        <h1 class="text-base sm:text-lg md:text-xl font-extrabold tracking-tight text-white leading-tight">
+                            Sistem Pendinginan Radiator <span class="text-sky-400">(Liquid Cooled)</span>
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex items-center space-x-1">
+                    <a href="#tujuan" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Tujuan</a>
+                    <a href="#komponen" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Komponen</a>
+                    <a href="#simulasi" class="px-3 py-2 rounded-lg text-sm font-medium bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600 hover:text-white transition flex items-center gap-1.5">
+                        <i data-lucide="play-circle" class="w-4 h-4"></i> Simulasi Kerja
+                    </a>
+                    <a href="#troubleshooting" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Troubleshooting</a>
+                    <a href="#kuis" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Kuis Evaluasi</a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none" aria-label="Menu Navigasi">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-slate-900 border-t border-slate-800 px-4 pt-2 pb-4 space-y-1">
+            <a href="#tujuan" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">1. Tujuan Pembelajaran</a>
+            <a href="#komponen" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">2. Identifikasi Komponen</a>
+            <a href="#simulasi" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-medium text-sky-400 bg-slate-800/60">3. Simulasi Sirkulasi & Suhu</a>
+            <a href="#troubleshooting" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">4. Analisis Gangguan</a>
+            <a href="#kuis" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">5. Kuis Evaluasi</a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white py-12 md:py-20 overflow-hidden">
+        <!-- Decorative Grid -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs sm:text-sm text-sky-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>Mata Pelajaran: Pemeliharaan Mesin Sepeda Motor (PMSM)</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                        Menguasai Teknologi <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Sistem Pendinginan Cairan</span> pada Sepeda Motor Modern
+                    </h2>
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
+                        Pelajari bagaimana mesin sepeda motor berkapasitas tinggi menjaga suhu kerja idealnya (80°C – 95°C) melalui sirkulasi <em>coolant</em>, katup <em>thermostat</em>, dan kontrol elektronik kipas radiator.
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <a href="#simulasi" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold shadow-lg shadow-sky-600/30 transition transform hover:-translate-y-0.5">
+                            <i data-lucide="sliders" class="w-5 h-5"></i>
+                            Mulai Simulasi Interaktif
+                        </a>
+                        <a href="#komponen" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition">
+                            <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
+                            Eksplorasi Komponen
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Stats / Info Card -->
+                <div class="lg:col-span-5">
+                    <div class="bg-slate-800/70 backdrop-blur-md border border-slate-700/80 rounded-2xl p-6 shadow-2xl space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                            <span class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Parameter Kerja Standar</span>
+                            <span class="px-2.5 py-1 text-xs font-mono bg-emerald-500/20 text-emerald-300 rounded-md border border-emerald-500/30">EFI / Liquid Cooled</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                                <div class="text-xs text-slate-400 mb-1">Suhu Kerja Ideal</div>
+                                <div class="text-2xl font-mono font-bold text-emerald-400">80° – 95°C</div>
+                                <div class="text-[11px] text-slate-400 mt-1">Efisiensi pembakaran optimal</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                                <div class="text-xs text-slate-400 mb-1">Tekanan Tutup Radiator</div>
+                                <div class="text-2xl font-mono font-bold text-sky-400">1.1 bar</div>
+                                <div class="text-[11px] text-slate-400 mt-1">± 108 kPa (Menaikkan titik didih)</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                                <div class="text-xs text-slate-400 mb-1">Bukaan Awal Thermostat</div>
+                                <div class="text-2xl font-mono font-bold text-amber-400">± 82°C</div>
+                                <div class="text-[11px] text-slate-400 mt-1">Terbuka penuh pada ± 95°C</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                                <div class="text-xs text-slate-400 mb-1">Aktivasi Kipas (ECT)</div>
+                                <div class="text-2xl font-mono font-bold text-rose-400">≥ 98°C</div>
+                                <div class="text-[11px] text-slate-400 mt-1">Dikontrol ECU via Relay Fan</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. TUJUAN PEMBELAJARAN -->
+    <section id="tujuan" class="py-14 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-100 px-3 py-1 rounded-full">Capaian Pembelajaran</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">Tujuan Pembelajaran</h2>
+            <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                Setelah mempelajari modul interaktif ini, peserta didik diharapkan mampu menguasai 4 kompetensi utama berikut:
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4 group-hover:bg-sky-600 group-hover:text-white transition">
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">1. Memahami Fungsi</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Menjelaskan fungsi utama sistem pendinginan air (<em>radiator</em>) dalam menyerap panas berlebih dan menjaga stabilitas suhu kerja mesin sepeda motor.
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">2. Identifikasi Komponen</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Mengidentifikasi letak, konstruksi, dan fungsi spesifik dari 9 komponen utama sistem pendinginan radiator beserta sensor elektroniknya.
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:bg-amber-600 group-hover:text-white transition">
+                    <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">3. Analisis Sirkulasi</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Menganalisis aliran cairan pendingin (<em>coolant</em>) saat mesin dingin (<em>bypass</em>), suhu kerja ideal, maupun kondisi beban berat/macet.
+                </p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 group-hover:bg-rose-600 group-hover:text-white transition">
+                    <i data-lucide="wrench" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">4. Diagnosis Gangguan</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Mendiagnosis penyebab kerusakan (seperti <em>overheating</em> atau kebocoran) serta menentukan prosedur pemeriksaan dan perbaikannya.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. MATERI & IDENTIFIKASI KOMPONEN INTERAKTIF -->
+    <section id="komponen" class="py-14 md:py-20 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Pengantar Fungsi Sistem Pendinginan -->
+            <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 mb-12 shadow-xl">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-8 space-y-3">
+                        <div class="inline-flex items-center gap-2 text-sky-400 font-semibold text-sm">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                            <span>Konsep Dasar Sistem Pendinginan Radiator</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold">Mengapa Sepeda Motor Membutuhkan Sistem Pendinginan Cairan?</h3>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                            Proses pembakaran di dalam silinder menghasilkan suhu hingga <strong>2.000°C</strong>. Jika panas ini tidak dikendalikan, komponen logam seperti piston dan silinder akan memuai berlebihan hingga macet (<em>seized</em>). Sebaliknya, mesin yang terlalu dingin membuat penguapan bahan bakar buruk dan boros BBM. Sistem pendinginan radiator bertugas menjaga suhu mesin tetap stabil pada kisaran ideal (<strong>80°C – 95°C</strong>).
+                        </p>
+                    </div>
+                    <div class="lg:col-span-4 bg-slate-800/90 p-5 rounded-xl border border-slate-700 space-y-2.5">
+                        <h4 class="text-sm font-bold text-sky-300 uppercase tracking-wider">Keunggulan Liquid Cooled:</h4>
+                        <ul class="text-xs sm:text-sm text-slate-300 space-y-2">
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Kontrol suhu jauh lebih stabil dibanding pendingin udara sirip.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Meredam suara mekanis mesin (<em>water jacket</em> bertindak sebagai peredam).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Aman saat terjebak kemacetan karena dibantu kipas radiator elektrik.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="text-xs font-bold uppercase tracking-widest text-sky-600 bg-sky-100 px-3 py-1 rounded-full">Eksplorasi Komponen</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">Diagram & Identifikasi Komponen Utama</h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    Klik titik nomor pada diagram skema di bawah ini atau pilih kartu komponen untuk mempelajari fungsi, cara kerja, dan gejala kerusakannya.
+                </p>
+            </div>
+
+            <!-- Interactive Component Explorer Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Column: Interactive SVG Diagram -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-800 shadow-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                            SKEMA SISTEM PENDINGINAN SEPEDA MOTOR
+                        </span>
+                        <span class="text-xs text-sky-400 font-medium">Klik angka pada diagram</span>
+                    </div>
+
+                    <!-- Responsive SVG Schematic -->
+                    <div class="relative w-full overflow-hidden rounded-xl bg-slate-950 border border-slate-800">
+                        <svg viewBox="0 0 760 460" class="w-full h-auto select-none" id="component-svg">
+                            <defs>
+                                <linearGradient id="radGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.35"/>
+                                    <stop offset="50%" stop-color="#a855f7" stop-opacity="0.25"/>
+                                    <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.35"/>
+                                </linearGradient>
+                                <linearGradient id="engineGrad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#334155"/>
+                                    <stop offset="100%" stop-color="#1e293b"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Background Grid Lines -->
+                            <g stroke="#1e293b" stroke-width="1">
+                                <line x1="0" y1="115" x2="760" y2="115"/>
+                                <line x1="0" y1="230" x2="760" y2="230"/>
+                                <line x1="0" y1="345" x2="760" y2="345"/>
+                                <line x1="190" y1="0" x2="190" y2="460"/>
+                                <line x1="380" y1="0" x2="380" y2="460"/>
+                                <line x1="570" y1="0" x2="570" y2="460"/>
+                            </g>
+
+                            <!-- 1. RADIATOR ASSEMBLY (Left) -->
+                            <g id="svg-comp-radiator" class="cursor-pointer" onclick="selectComponent('radiator')">
+                                <!-- Upper Tank -->
+                                <rect x="90" y="95" width="130" height="28" rx="6" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                                <text x="155" y="113" text-anchor="middle" fill="#cbd5e1" font-size="10" font-family="Inter" font-weight="600">UPPER TANK</text>
+                                
+                                <!-- Radiator Core (Fins & Tubes) -->
+                                <rect x="95" y="123" width="120" height="170" fill="url(#radGrad)" stroke="#475569" stroke-width="2"/>
+                                <!-- Core Vertical Tubes & Horizontal Fins -->
+                                <g stroke="#64748b" stroke-width="1.5" opacity="0.7">
+                                    <line x1="115" y1="123" x2="115" y2="293"/>
+                                    <line x1="135" y1="123" x2="135" y2="293"/>
+                                    <line x1="155" y1="123" x2="155" y2="293"/>
+                                    <line x1="175" y1="123" x2="175" y2="293"/>
+                                    <line x1="195" y1="123" x2="195" y2="293"/>
+                                </g>
+                                <g stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3" opacity="0.5">
+                                    <line x1="95" y1="145" x2="215" y2="145"/>
+                                    <line x1="95" y1="170" x2="215" y2="170"/>
+                                    <line x1="95" y1="195" x2="215" y2="195"/>
+                                    <line x1="95" y1="220" x2="215" y2="220"/>
+                                    <line x1="95" y1="245" x2="215" y2="245"/>
+                                    <line x1="95" y1="270" x2="215" y2="270"/>
+                                </g>
+
+                                <!-- Lower Tank -->
+                                <rect x="90" y="293" width="130" height="28" rx="6" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                                <text x="155" y="311" text-anchor="middle" fill="#cbd5e1" font-size="10" font-family="Inter" font-weight="600">LOWER TANK</text>
+                            </g>
+
+                            <!-- 2. RADIATOR CAP (Top of Upper Tank) -->
+                            <g id="svg-comp-cap" class="cursor-pointer" onclick="selectComponent('cap')">
+                                <rect x="135" y="75" width="40" height="20" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                                <rect x="128" y="70" width="54" height="7" rx="3" fill="#0369a1" stroke="#7dd3fc" stroke-width="1.5"/>
+                                <!-- Overflow Tube to Reservoir -->
+                                <path d="M 135 85 L 55 85 L 55 245" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5 3"/>
+                            </g>
+
+                            <!-- 6. RESERVOIR TANK (Far Left) -->
+                            <g id="svg-comp-reservoir" class="cursor-pointer" onclick="selectComponent('reservoir')">
+                                <rect x="25" y="245" width="52" height="105" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                <!-- Coolant level inside reservoir -->
+                                <rect x="28" y="285" width="46" height="62" rx="5" fill="#06b6d4" fill-opacity="0.45"/>
+                                <line x1="32" y1="275" x2="55" y2="275" stroke="#94a3b8" stroke-width="1.5"/>
+                                <text x="58" y="278" fill="#94a3b8" font-size="8" font-family="JetBrains Mono">UPPER</text>
+                                <line x1="32" y1="325" x2="55" y2="325" stroke="#94a3b8" stroke-width="1.5"/>
+                                <text x="58" y="328" fill="#94a3b8" font-size="8" font-family="JetBrains Mono">LOWER</text>
+                                <text x="51" y="365" text-anchor="middle" fill="#cbd5e1" font-size="9" font-weight="600">RESERVOIR</text>
+                            </g>
+
+                            <!-- 5. COOLING FAN (Behind Radiator) -->
+                            <g id="svg-comp-fan" class="cursor-pointer" onclick="selectComponent('fan')">
+                                <rect x="222" y="145" width="22" height="125" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                <circle cx="233" cy="207" r="36" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="4 2"/>
+                                <path d="M 233 175 L 240 207 L 233 239 L 226 207 Z" fill="#94a3b8"/>
+                                <text x="262" y="172" fill="#94a3b8" font-size="9" font-weight="600">KIPAS</text>
+                            </g>
+
+                            <!-- ENGINE BLOCK & WATER JACKET (Right) -->
+                            <g id="svg-comp-jacket" class="cursor-pointer" onclick="selectComponent('jacket')">
+                                <!-- Outer Engine Block -->
+                                <rect x="430" y="95" width="220" height="245" rx="18" fill="url(#engineGrad)" stroke="#64748b" stroke-width="2.5"/>
+                                <text x="540" y="122" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">BLOK SILINDER MESIN</text>
+                                
+                                <!-- Water Jacket Channels surrounding Cylinder -->
+                                <path d="M 465 145 H 615 V 290 H 465 Z" fill="#0284c7" fill-opacity="0.22" stroke="#38bdf8" stroke-width="3" rx="10"/>
+                                <!-- Inner Cylinder / Combustion Chamber -->
+                                <rect x="495" y="165" width="90" height="105" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="2"/>
+                                <text x="540" y="213" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="700">RUANG BAKAR</text>
+                                <text x="540" y="229" text-anchor="middle" fill="#94a3b8" font-size="9">&amp; SILINDER</text>
+                                <text x="540" y="158" text-anchor="middle" fill="#7dd3fc" font-size="9" font-weight="600">WATER JACKET</text>
+                            </g>
+
+                            <!-- HOSES / PIPING -->
+                            <!-- Upper Hose (Hot Coolant: Engine -> Thermostat -> Radiator Upper Tank) -->
+                            <path d="M 465 155 L 365 155 L 365 109 L 220 109" fill="none" stroke="#ef4444" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+                            <!-- Lower Hose (Cooled Coolant: Radiator Lower Tank -> Water Pump -> Engine) -->
+                            <path d="M 220 307 L 410 307 L 465 275" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+                            <!-- Bypass Hose (Thermostat -> Water Pump) -->
+                            <path d="M 365 165 L 365 285" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="6 4"/>
+                            <text x="373" y="232" fill="#fbbf24" font-size="9" font-weight="600">BYPASS</text>
+
+                            <!-- 4. THERMOSTAT (On Upper Outlet) -->
+                            <g id="svg-comp-thermostat" class="cursor-pointer" onclick="selectComponent('thermostat')">
+                                <circle cx="365" cy="155" r="20" fill="#1e293b" stroke="#f59e0b" stroke-width="3"/>
+                                <line x1="354" y1="163" x2="376" y2="147" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+                                <text x="365" y="128" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="700">THERMOSTAT</text>
+                            </g>
+
+                            <!-- 3. WATER PUMP (Bottom of Engine) -->
+                            <g id="svg-comp-pump" class="cursor-pointer" onclick="selectComponent('pump')">
+                                <circle cx="415" cy="305" r="24" fill="#1e293b" stroke="#06b6d4" stroke-width="3"/>
+                                <!-- Impeller blades -->
+                                <path d="M 415 289 L 415 321 M 399 305 L 431 305 M 404 294 L 426 316 M 426 294 L 404 316" stroke="#22d3ee" stroke-width="2.5"/>
+                                <text x="415" y="346" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="700">WATER PUMP</text>
+                            </g>
+
+                            <!-- 8. SENSOR ECT & ECU (Top Right of Engine) -->
+                            <g id="svg-comp-ect" class="cursor-pointer" onclick="selectComponent('ect')">
+                                <rect x="595" y="128" width="38" height="18" rx="4" fill="#e11d48" stroke="#fda4af" stroke-width="1.5"/>
+                                <text x="614" y="140" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="700">ECT</text>
+                                <!-- Signal line to ECU -->
+                                <path d="M 633 137 L 685 137 L 685 85" fill="none" stroke="#fb7185" stroke-width="2" stroke-dasharray="3 3"/>
+                                <rect x="650" y="45" width="75" height="40" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                                <text x="687" y="64" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">ECU / ECM</text>
+                                <text x="687" y="77" text-anchor="middle" fill="#94a3b8" font-size="8">Kontrol Kipas</text>
+                            </g>
+
+                            <!-- INTERACTIVE NUMBERED HOTSPOTS -->
+                            <!-- 1: Radiator -->
+                            <g class="cursor-pointer" onclick="selectComponent('radiator')">
+                                <circle cx="155" cy="205" r="18" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="155" cy="205" r="14" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="155" y="210" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">1</text>
+                            </g>
+                            <!-- 2: Tutup Radiator -->
+                            <g class="cursor-pointer" onclick="selectComponent('cap')">
+                                <circle cx="155" cy="52" r="16" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="155" cy="52" r="13" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="155" y="57" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">2</text>
+                            </g>
+                            <!-- 3: Water Pump -->
+                            <g class="cursor-pointer" onclick="selectComponent('pump')">
+                                <circle cx="415" cy="305" r="16" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="415" cy="305" r="13" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="415" y="310" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">3</text>
+                            </g>
+                            <!-- 4: Thermostat -->
+                            <g class="cursor-pointer" onclick="selectComponent('thermostat')">
+                                <circle cx="365" cy="155" r="16" fill="#d97706" class="hotspot-ring"/>
+                                <circle cx="365" cy="155" r="13" fill="#d97706" stroke="#ffffff" stroke-width="2"/>
+                                <text x="365" y="160" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">4</text>
+                            </g>
+                            <!-- 5: Kipas Radiator -->
+                            <g class="cursor-pointer" onclick="selectComponent('fan')">
+                                <circle cx="242" cy="207" r="16" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="242" cy="207" r="13" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="242" y="212" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">5</text>
+                            </g>
+                            <!-- 6: Reservoir Tank -->
+                            <g class="cursor-pointer" onclick="selectComponent('reservoir')">
+                                <circle cx="51" cy="298" r="16" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="51" cy="298" r="13" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="51" y="303" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">6</text>
+                            </g>
+                            <!-- 7: Water Jacket -->
+                            <g class="cursor-pointer" onclick="selectComponent('jacket')">
+                                <circle cx="540" cy="285" r="16" fill="#0284c7" class="hotspot-ring"/>
+                                <circle cx="540" cy="285" r="13" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <text x="540" y="290" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">7</text>
+                            </g>
+                            <!-- 8: Sensor ECT -->
+                            <g class="cursor-pointer" onclick="selectComponent('ect')">
+                                <circle cx="614" cy="112" r="16" fill="#e11d48" class="hotspot-ring"/>
+                                <circle cx="614" cy="112" r="13" fill="#e11d48" stroke="#ffffff" stroke-width="2"/>
+                                <text x="614" y="117" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="800">8</text>
+                            </g>
+
+                            <!-- Legend -->
+                            <g transform="translate(20, 415)">
+                                <rect x="0" y="0" width="14" height="14" rx="3" fill="#ef4444"/>
+                                <text x="20" y="11" fill="#cbd5e1" font-size="11">Aliran Coolant Panas</text>
+                                <rect x="165" y="0" width="14" height="14" rx="3" fill="#0ea5e9"/>
+                                <text x="185" y="11" fill="#cbd5e1" font-size="11">Aliran Coolant Dingin</text>
+                                <rect x="330" y="0" width="14" height="14" rx="3" fill="#f59e0b"/>
+                                <text x="350" y="11" fill="#cbd5e1" font-size="11">Sirkulasi Bypass</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Component Selector Pills (Quick Buttons) -->
+                    <div class="mt-4 flex flex-wrap gap-2" id="component-pills">
+                        <!-- Generated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Detailed Component Inspector Panel -->
+                <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm sticky top-24">
+                    <div id="component-detail-panel" class="space-y-5">
+                        <!-- Content populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. SIMULASI INTERAKTIF CARA KERJA & SIRKULASI AIR PENDINGIN -->
+    <section id="simulasi" class="py-14 md:py-20 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 border border-sky-500/30 px-3 py-1 rounded-full">Laboratorium Virtual</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">Simulasi Cara Kerja & Sirkulasi Air Pendingin</h2>
+                <p class="text-slate-300 mt-2 text-sm sm:text-base">
+                    Geser pengatur suhu mesin atau pilih tombol mode kondisi kerja untuk mengamati perubahan bukaan katup <em>thermostat</em>, aliran <em>coolant</em>, putaran kipas, dan katup tutup radiator secara <em>real-time</em>.
+                </p>
+            </div>
+
+            <!-- Control Bar: Presets & Temperature Slider -->
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-5 sm:p-6 mb-8 shadow-xl">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Preset Mode Buttons -->
+                    <div class="lg:col-span-6 space-y-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Pilih Mode Kondisi Mesin:</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <button onclick="setTempMode(55)" id="btn-mode-cold" class="mode-btn px-3 py-3 rounded-xl border text-left transition flex flex-col justify-between bg-slate-900/80 border-slate-700 hover:border-sky-400">
+                                <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                                    <i data-lucide="snowflake" class="w-4 h-4"></i> Mesin Dingin
+                                </span>
+                                <span class="text-[11px] text-slate-400 mt-1">&lt; 80°C (Sirkulasi Bypass)</span>
+                            </button>
+                            <button onclick="setTempMode(88)" id="btn-mode-ideal" class="mode-btn px-3 py-3 rounded-xl border text-left transition flex flex-col justify-between bg-slate-900/80 border-slate-700 hover:border-emerald-400">
+                                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Suhu Kerja Ideal
+                                </span>
+                                <span class="text-[11px] text-slate-400 mt-1">80°C – 95°C (Sirkulasi Penuh)</span>
+                            </button>
+                            <button onclick="setTempMode(104)" id="btn-mode-hot" class="mode-btn px-3 py-3 rounded-xl border text-left transition flex flex-col justify-between bg-slate-900/80 border-slate-700 hover:border-rose-400">
+                                <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+                                    <i data-lucide="flame" class="w-4 h-4"></i> Panas / Macet
+                                </span>
+                                <span class="text-[11px] text-slate-400 mt-1">&gt; 95°C (Kipas ON &amp; Relief)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Temperature Slider -->
+                    <div class="lg:col-span-6 space-y-3 bg-slate-900/90 p-4 rounded-xl border border-slate-700/80">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                <i data-lucide="thermometer" class="w-5 h-5 text-sky-400"></i>
+                                Atur Suhu Coolant Mesin:
+                            </span>
+                            <span id="sim-temp-display" class="font-mono text-2xl sm:text-3xl font-extrabold text-sky-400">55°C</span>
+                        </div>
+                        <input type="range" id="temp-slider" min="30" max="110" value="55" class="w-full" style="background: linear-gradient(to right, #0ea5e9 0%, #10b981 55%, #f59e0b 75%, #ef4444 100%); border-radius: 999px;">
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400">
+                            <span>30°C (Start)</span>
+                            <span>80°C (Thermostat Buka)</span>
+                            <span>98°C (Fan ON)</span>
+                            <span>110°C (Max)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Simulation Display Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                
+                <!-- Left: Animated Circulation SVG -->
+                <div class="lg:col-span-8 bg-slate-950 rounded-2xl p-4 sm:p-6 border border-slate-800 shadow-2xl flex flex-col justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <span id="sim-phase-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                            FASE 1: PEMANASAN AWAL (THERMOSTAT TERTUTUP)
+                        </span>
+                        <span class="text-xs font-mono text-slate-400" id="sim-pressure-text">Tekanan Sistem: 0.2 bar</span>
+                    </div>
+
+                    <div class="w-full overflow-hidden rounded-xl bg-slate-900/50 border border-slate-800/80">
+                        <svg viewBox="0 0 760 430" class="w-full h-auto select-none">
+                            <!-- Airflow Arrows (Left of Radiator) -->
+                            <g id="sim-airflow" opacity="0.4">
+                                <path d="M 15 150 L 75 150 M 65 143 L 75 150 L 65 157" stroke="#38bdf8" stroke-width="2.5" fill="none"/>
+                                <path d="M 15 200 L 75 200 M 65 193 L 75 200 L 65 207" stroke="#38bdf8" stroke-width="2.5" fill="none"/>
+                                <path d="M 15 250 L 75 250 M 65 243 L 75 250 L 65 257" stroke="#38bdf8" stroke-width="2.5" fill="none"/>
+                                <text x="45" y="132" text-anchor="middle" fill="#7dd3fc" font-size="9" font-weight="600">UDARA LUAR</text>
+                            </g>
+
+                            <!-- RADIATOR -->
+                            <rect x="90" y="95" width="120" height="25" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                            <rect x="95" y="120" width="110" height="160" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+                            <!-- Radiator internal cooling channels -->
+                            <line x1="120" y1="120" x2="120" y2="280" id="rad-tube-1" stroke="#0ea5e9" stroke-width="5" class="flow-stopped"/>
+                            <line x1="150" y1="120" x2="150" y2="280" id="rad-tube-2" stroke="#0ea5e9" stroke-width="5" class="flow-stopped"/>
+                            <line x1="180" y1="120" x2="180" y2="280" id="rad-tube-3" stroke="#0ea5e9" stroke-width="5" class="flow-stopped"/>
+                            <rect x="90" y="280" width="120" height="25" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                            <text x="150" y="322" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="700">RADIATOR</text>
+
+                            <!-- RADIATOR CAP & PRESSURE VALVE -->
+                            <rect x="132" y="75" width="36" height="20" rx="3" fill="#0284c7" stroke="#7dd3fc" stroke-width="1.5"/>
+                            <!-- Overflow Pipe to Reservoir -->
+                            <path d="M 132 85 L 48 85 L 48 250" fill="none" stroke="#334155" stroke-width="6"/>
+                            <path id="sim-overflow-flow" d="M 132 85 L 48 85 L 48 250" fill="none" stroke="#ef4444" stroke-width="3" class="flow-stopped"/>
+
+                            <!-- RESERVOIR TANK -->
+                            <rect x="24" y="250" width="48" height="95" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                            <rect id="sim-reservoir-level" x="27" y="295" width="42" height="47" rx="4" fill="#06b6d4" fill-opacity="0.55"/>
+                            <text x="48" y="360" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="700">RESERVOIR</text>
+
+                            <!-- COOLING FAN (Animated Rotation) -->
+                            <g transform="translate(232, 200)">
+                                <rect x="-12" y="-65" width="24" height="130" rx="4" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                                <g id="sim-fan-blades">
+                                    <ellipse cx="0" cy="-35" rx="6" ry="25" fill="#38bdf8"/>
+                                    <ellipse cx="0" cy="35" rx="6" ry="25" fill="#38bdf8"/>
+                                    <ellipse cx="-25" cy="0" rx="20" ry="5" fill="#0284c7"/>
+                                    <ellipse cx="25" cy="0" rx="20" ry="5" fill="#0284c7"/>
+                                    <circle cx="0" cy="0" r="8" fill="#f8fafc"/>
+                                </g>
+                            </g>
+                            <text id="sim-fan-label" x="232" y="282" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">FAN: OFF</text>
+
+                            <!-- ENGINE BLOCK -->
+                            <rect x="440" y="90" width="230" height="245" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+                            <!-- Cylinder Wall / Combustion Heat Color -->
+                            <rect id="sim-cylinder-heat" x="505" y="160" width="100" height="110" rx="8" fill="#0284c7" fill-opacity="0.3" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="555" y="212" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="700">SILINDER MESIN</text>
+                            <text id="sim-cylinder-temp" x="555" y="230" text-anchor="middle" fill="#7dd3fc" font-size="11" font-family="JetBrains Mono" font-weight="700">55°C</text>
+
+                            <!-- WATER JACKET PATH (Always active when engine runs) -->
+                            <path d="M 470 275 L 470 145 L 635 145 L 635 285 L 470 285" fill="none" stroke="#1e293b" stroke-width="14" stroke-linejoin="round"/>
+                            <path id="sim-jacket-flow" d="M 470 275 L 470 145 L 635 145 L 635 285 L 470 285" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linejoin="round" class="flow-active"/>
+
+                            <!-- UPPER RADIATOR HOSE (Thermostat -> Radiator) -->
+                            <path d="M 470 145 L 365 145 L 365 107 L 210 107" fill="none" stroke="#1e293b" stroke-width="14" stroke-linejoin="round"/>
+                            <path id="sim-upper-flow" d="M 470 145 L 365 145 L 365 107 L 210 107" fill="none" stroke="#ef4444" stroke-width="6" stroke-linejoin="round" class="flow-stopped"/>
+
+                            <!-- LOWER RADIATOR HOSE (Radiator -> Water Pump) -->
+                            <path d="M 210 292 L 415 292 L 470 285" fill="none" stroke="#1e293b" stroke-width="14" stroke-linejoin="round"/>
+                            <path id="sim-lower-flow" d="M 210 292 L 415 292 L 470 285" fill="none" stroke="#0ea5e9" stroke-width="6" stroke-linejoin="round" class="flow-stopped"/>
+
+                            <!-- BYPASS CHANNEL (Thermostat -> Water Pump) -->
+                            <path d="M 365 145 L 365 292" fill="none" stroke="#1e293b" stroke-width="12"/>
+                            <path id="sim-bypass-flow" d="M 365 145 L 365 292" fill="none" stroke="#38bdf8" stroke-width="5" class="flow-active"/>
+                            <text x="348" y="220" text-anchor="end" fill="#94a3b8" font-size="10" font-weight="600">SALURAN BYPASS</text>
+
+                            <!-- THERMOSTAT VALVE VISUALIZATION -->
+                            <g transform="translate(365, 145)">
+                                <circle cx="0" cy="0" r="22" fill="#0f172a" stroke="#f59e0b" stroke-width="3"/>
+                                <!-- Moving Valve Plate -->
+                                <line id="sim-thermostat-valve" x1="-14" y1="0" x2="14" y2="0" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" style="transition: transform 0.4s ease;"/>
+                            </g>
+                            <text id="sim-thermostat-label" x="365" y="114" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="700">THERMOSTAT: TERTUTUP</text>
+
+                            <!-- WATER PUMP -->
+                            <g transform="translate(415, 292)">
+                                <circle cx="0" cy="0" r="22" fill="#0f172a" stroke="#06b6d4" stroke-width="3"/>
+                                <g class="fan-spinning">
+                                    <line x1="-12" y1="0" x2="12" y2="0" stroke="#22d3ee" stroke-width="3"/>
+                                    <line x1="0" y1="-12" x2="0" y2="12" stroke="#22d3ee" stroke-width="3"/>
+                                </g>
+                            </g>
+                            <text x="415" y="332" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="700">WATER PUMP (ON)</text>
+
+                            <!-- SENSOR ECT & ECU SIGNAL -->
+                            <rect x="615" y="118" width="40" height="20" rx="4" fill="#e11d48" stroke="#fda4af" stroke-width="1.5"/>
+                            <text x="635" y="131" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="700">ECT</text>
+                            <path id="sim-ecu-signal" d="M 635 118 L 635 65 L 232 65 L 232 135" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="4 4"/>
+                            <rect x="595" y="45" width="80" height="32" rx="6" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+                            <text x="635" y="65" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">ECU / ECM</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Right: Real-Time Telemetry & Explanation -->
+                <div class="lg:col-span-4 bg-slate-800/90 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-white border-b border-slate-700 pb-3 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-5 h-5 text-sky-400"></i>
+                            Status Komponen Real-Time
+                        </h3>
+
+                        <!-- Telemetry Indicators -->
+                        <div class="space-y-3">
+                            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Katup Thermostat</span>
+                                <span id="status-thermostat" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-sky-500/20 text-sky-300">TERTUTUP (0%)</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Sirkulasi ke Radiator</span>
+                                <span id="status-circulation" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300">HANYA BYPASS</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Kipas Radiator (Fan)</span>
+                                <span id="status-fan" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-700 text-slate-300">MATI (OFF)</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Katup Tutup Radiator</span>
+                                <span id="status-cap" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300">TERTUTUP RAPAT</span>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Narrative Box -->
+                        <div id="sim-explanation-box" class="bg-sky-950/60 border border-sky-500/30 rounded-xl p-4 space-y-2">
+                            <h4 id="sim-exp-title" class="text-sm font-bold text-sky-300">Analisis Proses Kerja:</h4>
+                            <p id="sim-exp-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                Saat mesin baru dihidupkan (suhu &lt; 80°C), katup <strong>Thermostat tertutup</strong>. Pompa air hanya mensirkulasikan <em>coolant</em> di dalam <em>water jacket</em> mesin melalui saluran <em>bypass</em> agar mesin cepat mencapai suhu kerja ideal.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-700/80 text-[11px] text-slate-400 flex items-start gap-2">
+                        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                        <span>Tips Praktik: Jangan pernah melepas <em>thermostat</em> secara permanen karena akan membuat mesin terlalu dingin (<em>overcooling</em>) dan boros bahan bakar.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. ANALISIS GANGGUAN & TROUBLESHOOTING -->
+    <section id="troubleshooting" class="py-14 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-10">
+            <span class="text-xs font-bold uppercase tracking-widest text-rose-600 bg-rose-100 px-3 py-1 rounded-full">Diagnosa Bengkel TSM</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">Analisis Gangguan & Troubleshooting</h2>
+            <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                Pilih gejala kerusakan pada sistem pendinginan di bawah ini untuk menganalisis kemungkinan penyebab dan langkah perbaikannya sesuai SOP bengkel resmi.
+            </p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8" id="trouble-filters">
+            <button onclick="filterTroubleshooting('all')" class="trouble-filter-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-900 text-white shadow-sm transition">Semua Kasus</button>
+            <button onclick="filterTroubleshooting('overheat')" class="trouble-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Mesin Overheating</button>
+            <button onclick="filterTroubleshooting('leak')" class="trouble-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Kebocoran &amp; Berkurang</button>
+            <button onclick="filterTroubleshooting('electrical')" class="trouble-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">Kipas &amp; Sensor ECT</button>
+        </div>
+
+        <!-- Troubleshooting Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="troubleshooting-grid">
+            <!-- Populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- 6. KUIS EVALUASI INTERAKTIF -->
+    <section id="kuis" class="py-14 md:py-20 bg-slate-100 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">Uji Kompetensi Siswa</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">Kuis Evaluasi Sistem Pendinginan</h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    Jawablah 6 soal studi kasus dan pemahaman konsep berikut untuk mengukur penguasaan materi Anda.
+                </p>
+            </div>
+
+            <!-- Quiz Container -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <!-- Progress Header -->
+                <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span id="quiz-progress-text" class="text-sm font-bold text-sky-400">Soal 1 dari 6</span>
+                        <span class="text-xs text-slate-400 hidden sm:inline">| Pilih satu jawaban yang paling tepat</span>
+                    </div>
+                    <div class="text-sm font-mono bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
+                        Skor: <span id="quiz-live-score" class="text-emerald-400 font-bold">0</span>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-800 h-1.5">
+                    <div id="quiz-progress-bar" class="bg-sky-500 h-1.5 transition-all duration-300" style="width: 16.66%"></div>
+                </div>
+
+                <!-- Active Question Area -->
+                <div id="quiz-question-area" class="p-6 sm:p-8 space-y-6">
+                    <!-- Dynamic Question Content -->
+                </div>
+
+                <!-- Quiz Final Result Area (Hidden initially) -->
+                <div id="quiz-result-area" class="hidden p-8 sm:p-10 text-center space-y-6">
+                    <!-- Dynamic Final Result Content -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5 text-white">
+                <i data-lucide="cog" class="w-5 h-5 text-sky-500"></i>
+                <span class="font-bold text-sm sm:text-base">Media Pembelajaran Teknik Sepeda Motor (TSM)</span>
+            </div>
+            <p class="text-xs text-slate-500 text-center sm:text-right">
+                Materi: Sistem Pendinginan Radiator (Liquid Cooled) • Kurikulum Merdeka SMK Otomotif
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // ==========================================
+        // 1. DATA KOMPONEN SISTEM PENDINGINAN
+        // ==========================================
+        const componentsData = [
+            {
+                id: 'radiator',
+                number: 1,
+                name: 'Radiator (Upper Tank, Core, Lower Tank)',
+                category: 'Penukar Panas Utama',
+                color: 'sky',
+                function: 'Mendinginkan cairan pendingin (coolant) yang telah menyerap panas dari mesin dengan cara melepaskan panas tersebut ke udara luar.',
+                working: 'Cairan panas dari mesin masuk ke Upper Tank, lalu mengalir turun melalui pipa-pipa pipih (tubes) pada bagian Core yang dilengkapi sirip-sirip pendingin (fins). Hembusan udara dari laju motor atau hisapan kipas menyerap panas dari sirip radiator sehingga coolant yang tiba di Lower Tank suhunya telah turun.',
+                symptoms: 'Kisi-kisi (fins) penyok/tersumbat lumpur menyebabkan pendinginan tidak maksimal (overheating). Kebocoran pada sambungan tangki plastik atas/bawah menyebabkan air radiator cepat habis.'
+            },
+            {
+                id: 'cap',
+                number: 2,
+                name: 'Tutup Radiator (Pressure & Vacuum Valve)',
+                category: 'Pengatur Tekanan Sistem',
+                color: 'sky',
+                function: 'Menutup lubang pengisian radiator sekaligus menjaga tekanan di dalam sistem pendinginan (± 1.1 bar / 108 kPa) agar titik didih coolant meningkat di atas 100°C (mencapai ± 120°C).',
+                working: 'Memiliki 2 katup: (1) Pressure Valve (Katup Tekan) terbuka saat suhu & tekanan berlebih untuk mengalirkan coolant ke tangki reservoir; (2) Vacuum Valve (Katup Vakum) terbuka saat mesin dingin dan terjadi kevakuman untuk menghisap kembali coolant dari reservoir ke radiator.',
+                symptoms: 'Pegas katup tekan lemah membuat air radiator mendidih sebelum 100°C dan meluap ke reservoir. Karet seal sobek menghilangkan tekanan sistem.'
+            },
+            {
+                id: 'pump',
+                number: 3,
+                name: 'Water Pump (Pompa Air)',
+                category: 'Sirkulasi Mekanis',
+                color: 'cyan',
+                function: 'Mensirkulasikan cairan pendingin secara paksa ke seluruh saluran sistem pendinginan (water jacket mesin dan radiator) selama mesin hidup.',
+                working: 'Umumnya digerakkan oleh putaran poros nok (camshaft) atau poros engkol melalui roda gigi. Putaran sudu-sudu (impeller) menghasilkan gaya sentrifugal yang menghisap coolant dingin dari lower tank radiator dan menekannya masuk ke water jacket blok silinder.',
+                symptoms: 'Mechanical seal bocor menyebabkan coolant menetes dari lubang pembuangan (weep hole) atau bercampur dengan oli mesin (oli berubah warna menjadi putih susu).'
+            },
+            {
+                id: 'thermostat',
+                number: 4,
+                name: 'Thermostat',
+                category: 'Katup Pengatur Suhu',
+                color: 'amber',
+                function: 'Mempercepat tercapainya suhu kerja ideal mesin saat start dingin dan menjaga kestabilan suhu operasional mesin pada kisaran 80°C – 95°C.',
+                working: 'Di dalamnya terdapat tabung lilin khusus (wax pellet). Saat mesin dingin (< 80°C), lilin menyusut sehingga katup menutup jalur ke radiator dan air hanya bersirkulasi lewat saluran bypass. Saat suhu mencapai ± 82°C, lilin memuai dan mendorong katup terbuka penuh pada ± 95°C.',
+                symptoms: 'Macet tertutup menyebabkan mesin cepat mengalami overheating parah meski kipas berputar. Macet terbuka membuat mesin lambat panas (overcooling) dan konsumsi BBM boros.'
+            },
+            {
+                id: 'fan',
+                number: 5,
+                name: 'Kipas Radiator (Cooling Fan)',
+                category: 'Pendingin Paksa Elektrik',
+                color: 'sky',
+                function: 'Menghisap udara luar melewati kisi-kisi radiator untuk mempercepat pelepasan panas ketika sepeda motor berhenti, macet, atau berjalan lambat.',
+                working: 'Pada motor injeksi (EFI), kipas digerakkan oleh motor listrik DC 12V yang dikontrol oleh ECU melalui relay kipas. Kipas akan aktif otomatis ketika sensor ECT membaca suhu coolant mencapai ≥ 98°C dan mati kembali setelah suhu turun di bawah ± 93°C.',
+                symptoms: 'Motor kipas mati, sekring putus, atau relay rusak menyebabkan suhu mesin melonjak tajam saat motor terjebak kemacetan (indikator suhu menyala).'
+            },
+            {
+                id: 'reservoir',
+                number: 6,
+                name: 'Reservoir Tank (Tangki Cadangan)',
+                category: 'Penampung Ekspansi',
+                color: 'sky',
+                function: 'Menampung kelebihan volume cairan pendingin akibat pemuaian panas dari radiator dan mengembalikannya saat mesin dingin.',
+                working: 'Terhubung dengan leher tutup radiator melalui selang karet. Dilengkapi tanda batas ketinggian cairan (UPPER dan LOWER) untuk memudahkan pemeriksaan volume coolant tanpa harus membuka tutup radiator saat mesin panas.',
+                symptoms: 'Tangki retak atau selang penghubung tersumbat/bocor membuat coolant tidak dapat kembali ke radiator sehingga lama-kelamaan radiator kekurangan cairan.'
+            },
+            {
+                id: 'jacket',
+                number: 7,
+                name: 'Water Jacket (Mantel Air)',
+                category: 'Penyerap Panas Mesin',
+                color: 'indigo',
+                function: 'Saluran-saluran air yang mengelilingi dinding silinder dan kepala silinder (cylinder head) untuk menyerap panas pembakaran secara langsung.',
+                working: 'Cairan pendingin yang dipompa masuk ke rongga water jacket bersentuhan langsung dengan dinding luar silinder dan ruang bakar, menyerap energi panas secara konduksi & konveksi, lalu membawanya keluar menuju thermostat.',
+                symptoms: 'Penggunaan air keran biasa (bukan coolant) memicu karat dan kerak kapur di dalam water jacket sehingga menghambat perpindahan panas dan menyumbat saluran.'
+            },
+            {
+                id: 'ect',
+                number: 8,
+                name: 'Sensor ECT (Engine Coolant Temperature)',
+                category: 'Sensor Elektronik EFI',
+                color: 'rose',
+                function: 'Mendeteksi suhu cairan pendingin mesin secara akurat dan mengirimkan sinyal tegangan ke ECU/ECM.',
+                working: 'Menggunakan komponen Thermistor tipe NTC (Negative Temperature Coefficient), di mana nilai tahanannya akan menurun seiring meningkatnya suhu coolant. Data dari ECT digunakan ECU untuk mengatur durasi injeksi bahan bakar, waktu pengapian, menyalakan kipas radiator, dan menyalakan lampu indikator suhu di speedometer.',
+                symptoms: 'Sensor ECT rusak/putus memunculkan kode kedipan MIL (Malfunction Indicator Lamp), kipas radiator tidak mau berputar otomatis, atau motor sulit dihidupkan saat dingin.'
+            }
+        ];
+
+        // ==========================================
+        // 2. DATA TROUBLESHOOTING
+        // ==========================================
+        const troubleshootingData = [
+            {
+                category: 'overheat',
+                badge: 'Mesin Overheating',
+                badgeColor: 'bg-rose-100 text-rose-700',
+                title: 'Thermostat Macet Tertutup (Stuck Closed)',
+                symptom: 'Suhu mesin cepat naik drastis setelah beberapa menit hidup, lampu indikator suhu menyala, tetapi selang atas dan kisi-kisi radiator terasa dingin.',
+                causes: [
+                    'Wax pellet di dalam thermostat sudah rusak/bocor.',
+                    'Korosi atau kerak akibat penggunaan air biasa bukan radiator coolant.'
+                ],
+                solution: 'Lepas thermostat, lakukan pengujian dengan merebusnya di dalam air bersama termometer. Jika katup tidak mulai membuka pada suhu ± 82°C, ganti thermostat baru.'
+            },
+            {
+                category: 'overheat',
+                badge: 'Mesin Overheating',
+                badgeColor: 'bg-rose-100 text-rose-700',
+                title: 'Kisi-Kisi Radiator Tersumbat / Penyok',
+                symptom: 'Mesin panas berlebih saat kecepatan tinggi maupun rendah, kipas radiator berputar normal terus-menerus.',
+                causes: [
+                    'Kotoran lumpur kering menutup celah sirip (fins) radiator.',
+                    'Sirip aluminium banyak yang penyok akibat semprotan air bertekanan tinggi atau kerikil.',
+                    'Saluran pipa internal (core) tersumbat kerak karat.'
+                ],
+                solution: 'Bersihkan sirip radiator dengan air bertekanan rendah dari arah belakang ke depan, luruskan sirip yang penyok dengan obeng pipih kecil, dan lakukan pengurasan (flushing) radiator.'
+            },
+            {
+                category: 'leak',
+                badge: 'Kebocoran & Berkurang',
+                badgeColor: 'bg-amber-100 text-amber-700',
+                title: 'Mechanical Seal Water Pump Aus',
+                symptom: 'Terdapat tetesan coolant di bawah rumah pompa air (lubang weep hole), atau oli mesin berubah warna menjadi putih keruh seperti susu.',
+                causes: [
+                    'Usia pakai mechanical seal & oil seal poros water pump sudah habis.',
+                    'Poros impeller tergores kotoran atau bearing water pump oblak.'
+                ],
+                solution: 'Bongkar cover water pump, ganti satu set mechanical seal, oil seal, bearing, dan O-ring, lalu kuras oli mesin jika sudah terkontaminasi coolant.'
+            },
+            {
+                category: 'leak',
+                badge: 'Kebocoran & Berkurang',
+                badgeColor: 'bg-amber-100 text-amber-700',
+                title: 'Tutup Radiator Lemah / Bocor Tekanan',
+                symptom: 'Air di tangki reservoir meluap keluar saat mesin panas, namun volume air di dalam radiator justru berkurang drastis.',
+                causes: [
+                    'Pegas katup tekan (pressure valve) sudah lemah sehingga membuka sebelum tekanan 1.1 bar.',
+                    'Karet gasket tutup radiator retak atau mengeras.'
+                ],
+                solution: 'Uji tutup radiator menggunakan Radiator Cap Tester. Jika tekanan turun di bawah standar (misal < 0.9 bar dalam 6 detik), segera ganti tutup radiator.'
+            },
+            {
+                category: 'electrical',
+                badge: 'Kipas & Sensor ECT',
+                badgeColor: 'bg-sky-100 text-sky-700',
+                title: 'Kipas Radiator Tidak Berputar Saat Panas',
+                symptom: 'Mesin aman saat melaju kencang, tetapi langsung overheating dan indikator suhu berkedip saat terjebak macet.',
+                causes: [
+                    'Motor kipas radiator terbakar / brush habis.',
+                    'Sekring (fuse) kipas putus atau relay fan rusak.',
+                    'Konektor sensor ECT lepas atau kabel putus.'
+                ],
+                solution: 'Periksa sekring dan relay kipas, uji motor kipas secara langsung ke baterai 12V, dan periksa nilai resistansi sensor ECT menggunakan multimeter.'
+            },
+            {
+                category: 'overheat',
+                badge: 'Mesin Overheating',
+                badgeColor: 'bg-rose-100 text-rose-700',
+                title: 'Terjebak Udara Palsu (Air Lock) Setelah Servis',
+                symptom: 'Setelah penggantian coolant atau bongkar mesin, suhu tiba-tiba melonjak tinggi dan sirkulasi tidak lancar.',
+                causes: [
+                    'Proses pengisian coolant tidak disertai prosedur pembuangan udara (air bleeding) sehingga gelembung udara terjebak di water jacket atau dekat thermostat.'
+                ],
+                solution: 'Buka baut air bleeder (jika ada) atau nyalakan mesin tanpa tutup radiator hingga gelembung udara keluar habis dan level coolant stabil.'
+            }
+        ];
+
+        // ==========================================
+        // 3. DATA KUIS EVALUASI (6 SOAL)
+        // ==========================================
+        const quizQuestions = [
+            {
+                question: "1. Apa fungsi utama dari tutup radiator yang dilengkapi dengan katup tekan (pressure valve) pada sistem pendinginan sepeda motor?",
+                options: [
+                    "Menurunkan tekanan di dalam radiator agar coolant cepat menguap",
+                    "Menaikkan tekanan sistem (± 1.1 bar) sehingga titik didih coolant meningkat di atas 100°C",
+                    "Mengatur kecepatan putaran impeller water pump sesuai putaran mesin",
+                    "Menyaring kotoran dan karat sebelum coolant masuk ke water jacket"
+                ],
+                correct: 1,
+                explanation: "Tutup radiator menahan tekanan sistem hingga sekitar 1.1 bar (108 kPa). Sesuai hukum fisika, peningkatan tekanan akan menaikkan titik didih cairan pendingin dari 100°C menjadi sekitar 120°C sehingga coolant tidak mudah mendidih."
+            },
+            {
+                question: "2. Ketika sepeda motor baru dihidupkan pada pagi hari (suhu mesin 40°C), bagaimanakah kondisi katup thermostat dan arah aliran cairan pendinginnya?",
+                options: [
+                    "Thermostat terbuka penuh, coolant mengalir deras menuju radiator untuk didinginkan",
+                    "Thermostat tertutup, coolant hanya bersirkulasi di dalam mesin melalui saluran bypass",
+                    "Thermostat terbuka sebagian, kipas radiator langsung berputar pada kecepatan tinggi",
+                    "Thermostat tertutup dan pompa air berhenti berputar hingga suhu mencapai 80°C"
+                ],
+                correct: 1,
+                explanation: "Pada suhu dingin (< 80°C), katup thermostat menutup saluran menuju radiator sehingga coolant hanya bersirkulasi di dalam water jacket mesin melalui jalur bypass. Tujuannya agar mesin cepat mencapai suhu kerja ideal."
+            },
+            {
+                question: "3. Seorang siswa melakukan praktik melepas komponen thermostat secara permanen dengan anggapan agar aliran air ke radiator lebih lancar. Dampak negatif apa yang akan terjadi pada sepeda motor tersebut?",
+                options: [
+                    "Mesin akan mengalami overheating parah saat kecepatan tinggi",
+                    "Tekanan di dalam reservoir tank meningkat drastis hingga pecah",
+                    "Mesin terlalu lama mencapai suhu kerja ideal (overcooling) sehingga pembakaran tidak sempurna dan boros BBM",
+                    "Kipas radiator akan terus berputar meskipun kunci kontak sudah dimatikan"
+                ],
+                correct: 2,
+                explanation: "Tanpa thermostat, air terus mengalir ke radiator sejak mesin dingin. Akibatnya mesin sulit mencapai suhu kerja ideal (overcooling), penguapan bahan bakar kurang optimal, emisi meningkat, dan konsumsi BBM menjadi boros."
+            },
+            {
+                question: "4. Pada sepeda motor sistem injeksi (EFI), komponen apakah yang berfungsi mendeteksi suhu cairan pendingin dan mengirimkan sinyal ke ECU untuk mengaktifkan kipas radiator saat suhu mencapai ≥ 98°C?",
+                options: [
+                    "Sensor TP (Throttle Position)",
+                    "Sensor CKP (Crankshaft Position)",
+                    "Sensor ECT (Engine Coolant Temperature)",
+                    "Katup Vacuum pada Tutup Radiator"
+                ],
+                correct: 2,
+                explanation: "Sensor ECT (Engine Coolant Temperature) menggunakan thermistor NTC untuk membaca suhu coolant. Saat suhu mencapai batas ambang (umumnya ≥ 98°C), ECU akan mengaktifkan relay kipas radiator."
+            },
+            {
+                question: "5. Seorang pelanggan mengeluhkan sepeda motornya mengalami overheating setiap kali terjebak kemacetan, namun suhu kembali normal saat motor dipacu kencang di jalan lurus. Komponen apakah yang paling mungkin mengalami gangguan?",
+                options: [
+                    "Kipas radiator (cooling fan) mati atau relay kipas rusak",
+                    "Kisi-kisi radiator bocor halus",
+                    "Impeller water pump patah seluruhnya",
+                    "Thermostat macet dalam posisi tertutup penuh"
+                ],
+                correct: 0,
+                explanation: "Saat motor melaju kencang, hembusan angin alami sudah cukup mendinginkan radiator. Namun saat macet/berhenti, radiator membutuhkan hisapan udara dari kipas radiator. Jika kipas mati, panas menumpuk dan menyebabkan overheating."
+            },
+            {
+                question: "6. Ketika dilakukan pemeriksaan rutin pada sepeda motor berpendingin cairan, ditemukan cairan coolant menetes dari lubang kecil (weep hole) di bawah rumah pompa air, serta oli mesin berubah warna menjadi putih keruh. Kerusakan terjadi pada komponen...",
+                options: [
+                    "Gasket tutup radiator",
+                    "Selang saluran bypass",
+                    "Mechanical seal dan oil seal water pump",
+                    "Sirip pendingin (fins) radiator"
+                ],
+                correct: 2,
+                explanation: "Water pump memiliki mechanical seal (menahan air) dan oil seal (menahan oli) yang dipisahkan lubang inspeksi (weep hole). Jika mechanical seal bocor, air menetes dari weep hole; jika kedua seal rusak, coolant masuk ke ruang mesin dan bercampur dengan oli."
+            }
+        ];
+
+        // ==========================================
+        // 4. INISIALISASI KOMPONEN INTERAKTIF
+        // ==========================================
+        let activeComponentId = 'radiator';
+
+        function initComponentsSection() {
+            const pillsContainer = document.getElementById('component-pills');
+            pillsContainer.innerHTML = componentsData.map(comp => `
+                <button 
+                    onclick="selectComponent('${comp.id}')" 
+                    id="pill-${comp.id}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border ${comp.id === activeComponentId ? 'bg-sky-600 text-white border-sky-500 shadow-sm' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}">
+                    <span class="w-4 h-4 rounded-full bg-slate-950/50 text-[10px] flex items-center justify-center">${comp.number}</span>
+                    <span>${comp.name.split(' (')[0]}</span>
+                </button>
+            `).join('');
+
+            renderComponentDetail(activeComponentId);
+        }
+
+        function selectComponent(id) {
+            activeComponentId = id;
+            
+            // Update pill button styles
+            componentsData.forEach(comp => {
+                const pill = document.getElementById(`pill-${comp.id}`);
+                if (pill) {
+                    if (comp.id === id) {
+                        pill.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border bg-sky-600 text-white border-sky-500 shadow-sm';
+                    } else {
+                        pill.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700';
+                    }
+                }
+            });
+
+            renderComponentDetail(id);
+        }
+
+        function renderComponentDetail(id) {
+            const comp = componentsData.find(c => c.id === id);
+            if (!comp) return;
+
+            const panel = document.getElementById('component-detail-panel');
+            panel.innerHTML = `
+                <div class="flex items-start justify-between gap-3 border-b border-slate-200 pb-4">
+                    <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-sky-100 text-sky-700 mb-1.5">
+                            Komponen #${comp.number} • ${comp.category}
+                        </span>
+                        <h3 class="text-xl font-extrabold text-slate-900 leading-snug">${comp.name}</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white font-mono font-bold text-lg flex items-center justify-center shrink-0">
+                        ${comp.number}
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-sky-600 mb-1.5 flex items-center gap-1.5">
+                            <i data-lucide="target" class="w-4 h-4"></i> Fungsi Utama
+                        </h4>
+                        <p class="text-sm text-slate-700 leading-relaxed">${comp.function}</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                            <i data-lucide="settings" class="w-4 h-4"></i> Prinsip &amp; Cara Kerja
+                        </h4>
+                        <p class="text-sm text-slate-700 leading-relaxed">${comp.working}</p>
+                    </div>
+
+                    <div class="bg-rose-50/80 p-4 rounded-xl border border-rose-200/80">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-rose-700 mb-1.5 flex items-center gap-1.5">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i> Gejala &amp; Dampak Kerusakan
+                        </h4>
+                        <p class="text-sm text-slate-800 leading-relaxed">${comp.symptoms}</p>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 5. LOGIKA SIMULASI INTERAKTIF SUHU & SIRKULASI
+        // ==========================================
+        const tempSlider = document.getElementById('temp-slider');
+        
+        function setTempMode(targetTemp) {
+            tempSlider.value = targetTemp;
+            updateSimulation(targetTemp);
+        }
+
+        function updateSimulation(tempVal) {
+            const temp = parseInt(tempVal, 10);
+            
+            // Update Temperature Text Displays
+            const tempDisplay = document.getElementById('sim-temp-display');
+            const cylTempText = document.getElementById('sim-cylinder-temp');
+            const cylHeatBox = document.getElementById('sim-cylinder-heat');
+            const pressureText = document.getElementById('sim-pressure-text');
+            
+            tempDisplay.textContent = `${temp}°C`;
+            cylTempText.textContent = `${temp}°C`;
+
+            // Calculate simulated pressure
+            const pressure = Math.min(1.25, Math.max(0.1, ((temp - 30) / 80) * 1.15)).toFixed(2);
+            pressureText.textContent = `Tekanan Sistem: ${pressure} bar`;
+
+            // Elements to animate
+            const jacketFlow = document.getElementById('sim-jacket-flow');
+            const upperFlow = document.getElementById('sim-upper-flow');
+            const lowerFlow = document.getElementById('sim-lower-flow');
+            const bypassFlow = document.getElementById('sim-bypass-flow');
+            const overflowFlow = document.getElementById('sim-overflow-flow');
+            const radTubes = [
+                document.getElementById('rad-tube-1'),
+                document.getElementById('rad-tube-2'),
+                document.getElementById('rad-tube-3')
+            ];
+            const thermostatValve = document.getElementById('sim-thermostat-valve');
+            const thermostatLabel = document.getElementById('sim-thermostat-label');
+            const fanBlades = document.getElementById('sim-fan-blades');
+            const fanLabel = document.getElementById('sim-fan-label');
+            const ecuSignal = document.getElementById('sim-ecu-signal');
+            const reservoirLevel = document.getElementById('sim-reservoir-level');
+
+            // Telemetry Badges
+            const phaseBadge = document.getElementById('sim-phase-badge');
+            const stThermostat = document.getElementById('status-thermostat');
+            const stCirculation = document.getElementById('status-circulation');
+            const stFan = document.getElementById('status-fan');
+            const stCap = document.getElementById('status-cap');
+            const expTitle = document.getElementById('sim-exp-title');
+            const expDesc = document.getElementById('sim-exp-desc');
+
+            // Highlight active preset button
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-sky-400', 'ring-emerald-400', 'ring-rose-400'));
+
+            // PHASE 1: MESIN DINGIN (< 80°C)
+            if (temp < 80) {
+                document.getElementById('btn-mode-cold').classList.add('ring-2', 'ring-sky-400');
+                tempDisplay.className = 'font-mono text-2xl sm:text-3xl font-extrabold text-sky-400';
+                cylHeatBox.setAttribute('fill', '#0284c7');
+                cylHeatBox.setAttribute('stroke', '#38bdf8');
+
+                // Thermostat Closed (0 deg horizontal blocking upper pipe)
+                thermostatValve.setAttribute('transform', 'rotate(0)');
+                thermostatLabel.textContent = 'THERMOSTAT: TERTUTUP';
+                thermostatLabel.setAttribute('fill', '#38bdf8');
+
+                // Flows: Jacket & Bypass Active (Cool Blue), Radiator Stopped
+                jacketFlow.setAttribute('stroke', '#38bdf8');
+                jacketFlow.setAttribute('class', 'flow-active');
+                bypassFlow.setAttribute('stroke', '#38bdf8');
+                bypassFlow.setAttribute('class', 'flow-active');
+
+                upperFlow.setAttribute('class', 'flow-stopped');
+                lowerFlow.setAttribute('class', 'flow-stopped');
+                radTubes.forEach(t => t.setAttribute('class', 'flow-stopped'));
+                overflowFlow.setAttribute('class', 'flow-stopped');
+                reservoirLevel.setAttribute('y', '295');
+                reservoirLevel.setAttribute('height', '47');
+
+                // Fan OFF
+                fanBlades.classList.remove('fan-spinning');
+                fanLabel.textContent = 'FAN: OFF';
+                fanLabel.setAttribute('fill', '#64748b');
+                ecuSignal.setAttribute('stroke', '#475569');
+                ecuSignal.setAttribute('class', '');
+
+                // Update Status Text
+                phaseBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40';
+                phaseBadge.textContent = 'FASE 1: MESIN DINGIN (< 80°C) — SIRKULASI BYPASS';
+                
+                stThermostat.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-sky-500/20 text-sky-300';
+                stThermostat.textContent = 'TERTUTUP (0%)';
+                stCirculation.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300';
+                stCirculation.textContent = 'HANYA BYPASS';
+                stFan.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-700 text-slate-300';
+                stFan.textContent = 'MATI (OFF)';
+                stCap.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300';
+                stCap.textContent = 'TERTUTUP RAPAT';
+
+                expTitle.textContent = 'Analisis Fase Mesin Dingin (< 80°C):';
+                expDesc.innerHTML = 'Lilin di dalam <strong>Thermostat</strong> masih menyusut sehingga katup tertutup rapat. <em>Water pump</em> mensirkulasikan <em>coolant</em> hanya di dalam <em>water jacket</em> mesin melewati jalur <strong>Bypass</strong>. Hal ini mempercepat pemanasan mesin menuju suhu kerja ideal.';
+            }
+            // PHASE 2: SUHU KERJA IDEAL (80°C - 95°C)
+            else if (temp >= 80 && temp <= 95) {
+                document.getElementById('btn-mode-ideal').classList.add('ring-2', 'ring-emerald-400');
+                tempDisplay.className = 'font-mono text-2xl sm:text-3xl font-extrabold text-emerald-400';
+                cylHeatBox.setAttribute('fill', '#f59e0b');
+                cylHeatBox.setAttribute('stroke', '#fbbf24');
+
+                // Thermostat Opening (45 to 75 deg)
+                const openPct = Math.round(((temp - 80) / 15) * 80) + 20;
+                const angle = Math.min(80, Math.round((openPct / 100) * 80));
+                thermostatValve.setAttribute('transform', `rotate(${angle})`);
+                thermostatLabel.textContent = `THERMOSTAT: BUKA (${openPct}%)`;
+                thermostatLabel.setAttribute('fill', '#34d399');
+
+                // Flows: Full Circulation Active! Hot to Radiator, Cooled to Engine
+                jacketFlow.setAttribute('stroke', '#f97316');
+                jacketFlow.setAttribute('class', 'flow-active');
+                upperFlow.setAttribute('stroke', '#ef4444');
+                upperFlow.setAttribute('class', 'flow-active');
+                lowerFlow.setAttribute('stroke', '#0ea5e9');
+                lowerFlow.setAttribute('class', 'flow-active');
+                radTubes.forEach(t => {
+                    t.setAttribute('stroke', '#38bdf8');
+                    t.setAttribute('class', 'flow-active');
+                });
+
+                // Bypass gradually closes as thermostat opens fully
+                if (temp > 90) {
+                    bypassFlow.setAttribute('class', 'flow-stopped');
+                } else {
+                    bypassFlow.setAttribute('stroke', '#f59e0b');
+                    bypassFlow.setAttribute('class', 'flow-active');
+                }
+
+                overflowFlow.setAttribute('class', 'flow-stopped');
+                reservoirLevel.setAttribute('y', '290');
+                reservoirLevel.setAttribute('height', '52');
+
+                // Fan still OFF (cooled by natural airflow)
+                fanBlades.classList.remove('fan-spinning');
+                fanLabel.textContent = 'FAN: STANDBY (OFF)';
+                fanLabel.setAttribute('fill', '#94a3b8');
+                ecuSignal.setAttribute('stroke', '#475569');
+                ecuSignal.setAttribute('class', '');
+
+                phaseBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                phaseBadge.textContent = 'FASE 2: SUHU KERJA IDEAL (80°C – 95°C) — SIRKULASI PENUH';
+
+                stThermostat.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300';
+                stThermostat.textContent = `TERBUKA (${openPct}%)`;
+                stCirculation.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-sky-500/20 text-sky-300';
+                stCirculation.textContent = 'KE RADIATOR (AKTIF)';
+                stFan.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-700 text-slate-300';
+                stFan.textContent = 'STANDBY (OFF)';
+                stCap.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300';
+                stCap.textContent = 'MENAHAN TEKANAN';
+
+                expTitle.textContent = 'Analisis Suhu Kerja Ideal (80°C – 95°C):';
+                expDesc.innerHTML = 'Lilin thermostat memuai dan membuka katup menuju <strong>Radiator</strong>. Cairan panas (merah) mengalir ke radiator untuk melepaskan panas ke udara luar, lalu kembali ke mesin dalam kondisi lebih dingin (biru). Efisiensi pembakaran mesin berada pada titik paling optimal.';
+            }
+            // PHASE 3: PANAS BERLEBIH / MACET (> 95°C)
+            else {
+                document.getElementById('btn-mode-hot').classList.add('ring-2', 'ring-rose-400');
+                tempDisplay.className = 'font-mono text-2xl sm:text-3xl font-extrabold text-rose-400';
+                cylHeatBox.setAttribute('fill', '#ef4444');
+                cylHeatBox.setAttribute('stroke', '#fca5a5');
+
+                // Thermostat Fully Open (90 deg)
+                thermostatValve.setAttribute('transform', 'rotate(90)');
+                thermostatLabel.textContent = 'THERMOSTAT: PENUH (100%)';
+                thermostatLabel.setAttribute('fill', '#f87171');
+
+                // Fast Circulation
+                jacketFlow.setAttribute('stroke', '#ef4444');
+                jacketFlow.setAttribute('class', 'flow-fast');
+                upperFlow.setAttribute('stroke', '#ef4444');
+                upperFlow.setAttribute('class', 'flow-fast');
+                lowerFlow.setAttribute('stroke', '#0284c7');
+                lowerFlow.setAttribute('class', 'flow-fast');
+                radTubes.forEach(t => {
+                    t.setAttribute('stroke', '#38bdf8');
+                    t.setAttribute('class', 'flow-fast');
+                });
+                bypassFlow.setAttribute('class', 'flow-stopped');
+
+                // Cooling Fan ON when >= 98°C
+                if (temp >= 98) {
+                    fanBlades.classList.add('fan-spinning');
+                    fanLabel.textContent = 'FAN: BERPUTAR (ON)';
+                    fanLabel.setAttribute('fill', '#38bdf8');
+                    ecuSignal.setAttribute('stroke', '#fb7185');
+                    ecuSignal.setAttribute('class', 'flow-fast');
+
+                    stFan.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 animate-pulse';
+                    stFan.textContent = 'AKTIF BERPUTAR (ON)';
+                } else {
+                    fanBlades.classList.remove('fan-spinning');
+                    fanLabel.textContent = 'FAN: SIAGA (< 98°C)';
+                    fanLabel.setAttribute('fill', '#fbbf24');
+                    ecuSignal.setAttribute('stroke', '#475569');
+                    ecuSignal.setAttribute('class', '');
+
+                    stFan.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300';
+                    stFan.textContent = 'SIAGA (< 98°C)';
+                }
+
+                // Pressure Valve opens when >= 103°C
+                if (temp >= 103) {
+                    overflowFlow.setAttribute('class', 'flow-active');
+                    reservoirLevel.setAttribute('y', '275');
+                    reservoirLevel.setAttribute('height', '67');
+                    stCap.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-500/20 text-rose-300';
+                    stCap.textContent = 'KATUP TEKAN BUKA';
+                } else {
+                    overflowFlow.setAttribute('class', 'flow-stopped');
+                    reservoirLevel.setAttribute('y', '286');
+                    reservoirLevel.setAttribute('height', '56');
+                    stCap.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300';
+                    stCap.textContent = 'TEKANAN TINGGI';
+                }
+
+                phaseBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+                phaseBadge.textContent = 'FASE 3: BEBAN BERAT / MACET (> 95°C) — PENDINGINAN MAKSIMAL';
+
+                stThermostat.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-500/20 text-rose-300';
+                stThermostat.textContent = 'TERBUKA PENUH (100%)';
+                stCirculation.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-500/20 text-rose-300';
+                stCirculation.textContent = 'SIRKULASI MAKSIMAL';
+
+                expTitle.textContent = 'Analisis Kondisi Panas Berlebih (> 95°C):';
+                expDesc.innerHTML = 'Thermostat terbuka penuh (100%) dan jalur <em>bypass</em> tertutup total. Pada suhu <strong>≥ 98°C</strong>, Sensor <strong>ECT</strong> mengirim sinyal ke <strong>ECU</strong> untuk menyalakan <strong>Kipas Radiator</strong>. Jika tekanan melebihi 1.1 bar (≥ 103°C), katup tekan tutup radiator terbuka mengalirkan ekspansi cairan ke <em>Reservoir</em>.';
+            }
+        }
+
+        tempSlider.addEventListener('input', (e) => {
+            updateSimulation(e.target.value);
+        });
+
+        // ==========================================
+        // 6. LOGIKA TROUBLESHOOTING FILTER
+        // ==========================================
+        function renderTroubleshooting(filter = 'all') {
+            const grid = document.getElementById('troubleshooting-grid');
+            const filtered = filter === 'all' 
+                ? troubleshootingData 
+                : troubleshootingData.filter(item => item.category === filter);
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold ${item.badgeColor}">${item.badge}</span>
+                            <i data-lucide="stethoscope" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">${item.title}</h3>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/70">
+                            <span class="text-[11px] font-bold uppercase text-slate-500 block mb-1">Gejala Kerusakan:</span>
+                            <p class="text-xs sm:text-sm text-slate-700">${item.symptom}</p>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold uppercase text-rose-600 block mb-1">Kemungkinan Penyebab:</span>
+                            <ul class="text-xs sm:text-sm text-slate-600 space-y-1 list-disc list-inside">
+                                ${item.causes.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[11px] font-bold uppercase text-emerald-700 block mb-1 flex items-center gap-1">
+                            <i data-lucide="wrench" class="w-3.5 h-3.5"></i> Langkah Pemeriksaan &amp; Perbaikan:
+                        </span>
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${item.solution}</p>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function filterTroubleshooting(category) {
+            document.querySelectorAll('.trouble-filter-btn').forEach(btn => {
+                btn.className = 'trouble-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition';
+            });
+            event.target.className = 'trouble-filter-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-900 text-white shadow-sm transition';
+            renderTroubleshooting(category);
+        }
+
+        // ==========================================
+        // 7. LOGIKA KUIS EVALUASI INTERAKTIF
+        // ==========================================
+        let currentQuestionIdx = 0;
+        let quizScore = 0;
+        let answeredCurrent = false;
+
+        function renderQuizQuestion() {
+            answeredCurrent = false;
+            const q = quizQuestions[currentQuestionIdx];
+            const total = quizQuestions.length;
+
+            document.getElementById('quiz-progress-text').textContent = `Soal ${currentQuestionIdx + 1} dari ${total}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQuestionIdx + 1) / total) * 100}%`;
+            document.getElementById('quiz-live-score').textContent = quizScore;
+
+            const qArea = document.getElementById('quiz-question-area');
+            qArea.classList.remove('hidden');
+            document.getElementById('quiz-result-area').classList.add('hidden');
+
+            const letters = ['A', 'B', 'C', 'D'];
+            qArea.innerHTML = `
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-relaxed">
+                    ${q.question}
+                </h3>
+                <div class="space-y-3" id="quiz-options-list">
+                    ${q.options.map((opt, idx) => `
+                        <button 
+                            onclick="handleQuizAnswer(${idx})" 
+                            id="quiz-opt-${idx}"
+                            class="w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition flex items-start gap-3.5 group">
+                            <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-sky-600 group-hover:text-white font-mono font-bold text-sm flex items-center justify-center shrink-0 transition">
+                                ${letters[idx]}
+                            </span>
+                            <span class="text-sm sm:text-base text-slate-700 font-medium pt-0.5">${opt}</span>
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="quiz-feedback-box" class="hidden rounded-xl p-4 sm:p-5 border"></div>
+                <div class="flex justify-end pt-2">
+                    <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm shadow-md transition items-center gap-2">
+                        <span>${currentQuestionIdx === total - 1 ? 'Lihat Hasil Akhir' : 'Soal Berikutnya'}</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function handleQuizAnswer(selectedIdx) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const q = quizQuestions[currentQuestionIdx];
+            const isCorrect = selectedIdx === q.correct;
+
+            if (isCorrect) {
+                quizScore += Math.round(100 / quizQuestions.length);
+                if (currentQuestionIdx === quizQuestions.length - 1 && quizScore === 96) {
+                    quizScore = 100; // Ensure clean 100 on all 6 correct
+                }
+                document.getElementById('quiz-live-score').textContent = quizScore;
+            }
+
+            // Style options
+            q.options.forEach((_, idx) => {
+                const btn = document.getElementById(`quiz-opt-${idx}`);
+                btn.disabled = true;
+                btn.classList.remove('hover:border-sky-500', 'hover:bg-sky-50/50');
+
+                if (idx === q.correct) {
+                    btn.className = 'w-full text-left p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 flex items-start gap-3.5';
+                    btn.querySelector('span:first-child').className = 'w-7 h-7 rounded-lg bg-emerald-600 text-white font-mono font-bold text-sm flex items-center justify-center shrink-0';
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.className = 'w-full text-left p-4 rounded-xl border-2 border-rose-500 bg-rose-50 flex items-start gap-3.5';
+                    btn.querySelector('span:first-child').className = 'w-7 h-7 rounded-lg bg-rose-600 text-white font-mono font-bold text-sm flex items-center justify-center shrink-0';
+                } else {
+                    btn.className = 'w-full text-left p-4 rounded-xl border-2 border-slate-100 bg-slate-50/50 opacity-60 flex items-start gap-3.5';
+                }
+            });
+
+            // Show feedback explanation
+            const fbBox = document.getElementById('quiz-feedback-box');
+            fbBox.classList.remove('hidden');
+            if (isCorrect) {
+                fbBox.className = 'rounded-xl p-4 sm:p-5 border border-emerald-200 bg-emerald-50/90 text-emerald-950 space-y-1.5';
+                fbBox.innerHTML = `
+                    <div class="font-bold text-sm text-emerald-700 flex items-center gap-1.5">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> Jawaban Tepat!
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${q.explanation}</p>
+                `;
+            } else {
+                fbBox.className = 'rounded-xl p-4 sm:p-5 border border-rose-200 bg-rose-50/90 text-rose-950 space-y-1.5';
+                fbBox.innerHTML = `
+                    <div class="font-bold text-sm text-rose-700 flex items-center gap-1.5">
+                        <i data-lucide="x-circle" class="w-5 h-5"></i> Jawaban Kurang Tepat
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${q.explanation}</p>
+                `;
+            }
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('inline-flex');
+            lucide.createIcons();
+        }
+
+        function nextQuizQuestion() {
+            if (currentQuestionIdx < quizQuestions.length - 1) {
+                currentQuestionIdx++;
+                renderQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-question-area').classList.add('hidden');
+            const resArea = document.getElementById('quiz-result-area');
+            resArea.classList.remove('hidden');
+
+            let predicate = '';
+            let badgeColor = '';
+            let message = '';
+
+            if (quizScore >= 80) {
+                predicate = 'KOMPETEN (SANGAT BAIK)';
+                badgeColor = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+                message = 'Luar biasa! Anda telah menguasai fungsi komponen, prinsip sirkulasi cairan pendingin, serta analisis gangguan sistem radiator dengan sangat baik.';
+            } else if (quizScore >= 60) {
+                predicate = 'CUKUP KOMPETEN';
+                badgeColor = 'bg-amber-100 text-amber-700 border-amber-300';
+                message = 'Hasil yang cukup baik, namun beberapa konsep diagnosis dan cara kerja komponen masih perlu diperdalam kembali.';
+            } else {
+                predicate = 'PERLU REMIDIAL / BELAJAR ULANG';
+                badgeColor = 'bg-rose-100 text-rose-700 border-rose-300';
+                message = 'Silakan pelajari kembali bagian Identifikasi Komponen dan Simulasi Sirkulasi di atas, lalu ulangi kuis ini untuk meningkatkan nilai Anda.';
+            }
+
+            resArea.innerHTML = `
+                <div class="w-20 h-20 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mx-auto">
+                    <i data-lucide="award" class="w-10 h-10"></i>
+                </div>
+                <div class="space-y-2">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">${predicate}</span>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Nilai Akhir Anda: <span class="text-sky-600">${quizScore}</span> / 100</h3>
+                    <p class="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">${message}</p>
+                </div>
+                <div class="pt-4">
+                    <button onclick="restartQuiz()" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-lg transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        Ulangi Kuis Evaluasi
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function restartQuiz() {
+            currentQuestionIdx = 0;
+            quizScore = 0;
+            renderQuizQuestion();
+        }
+
+        // ==========================================
+        // 8. MOBILE MENU TOGGLE & WINDOW ONLOAD
+        // ==========================================
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.add('hidden');
+            });
+        });
+
+        window.onload = function() {
+            lucide.createIcons();
+            initComponentsSection();
+            updateSimulation(55);
+            renderTroubleshooting('all');
+            renderQuizQuestion();
+        };
+    </script>
+</body>
+</html>
